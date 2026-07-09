@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { axiosinstanse } from "../utils/apiAxios";
+
 import { useNavigate } from "react-router-dom";
 
 const Home = () => {

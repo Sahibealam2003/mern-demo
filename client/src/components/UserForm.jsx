@@ -20,8 +20,9 @@ const nav = useNavigate()
     e.preventDefault();
     
     try {
-        const res = await axiosinstanse.post('/api/auth/signup',formData)
+        await axiosinstanse.post('/api/auth/signup', formData)
         nav('/')
+
         
     } catch (error) {
      console.log(error);
