@@ -6,19 +6,18 @@ import { useNavigate } from "react-router-dom";
 const Home = () => {
   const [data, setData] = useState([]);
   const nav=useNavigate() 
-
-  async function getData() {
+useEffect(() => {
+  const fetchData = async () => {
     try {
-      const res = await axiosinstanse.get('/api/auth')
+      const res = await axiosinstanse.get("/api/auth");
       setData(res.data.data);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
-  }
+  };
 
-  useEffect(() => {
-    getData();
-  }, []);
+  fetchData();
+}, []);
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
