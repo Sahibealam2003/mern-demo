@@ -34,12 +34,17 @@ export const create = async (req, res) => {
 
     const workspace = await createWorkspace(userId, { name, description, color, isPrivate });
 
+    // Activity schema expects: action/entityType/entityId (see Activity.js)
     await Activity.create({
       user: userId,
       workspace: workspace._id,
-      action: 'WORKSPACE_CREATED',
-      description: `Created workspace "${workspace.name}"`,
+      action: 'created',
+      entityType: 'Workspace',
+      entityId: workspace._id,
+      changes: { name: workspace.name },
+      metadata: { description: `Created workspace "${workspace.name}"` },
     });
+
 
     res.status(201).json({
       success: true,

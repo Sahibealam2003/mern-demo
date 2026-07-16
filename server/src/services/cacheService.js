@@ -1,11 +1,20 @@
 import { getCache, setCache, deleteCache, deleteCachePattern } from '../config/redis.js';
 import { CACHE_TTL } from '../utils/constants.js';
 import logger from '../utils/logger.js';
-
 /**
  * Cache service for managing Redis cache operations
  */
+export const getCachedData = async (key) => {
+  return await getCache(key);
+};
 
+export const setCachedData = async (key, value, ttl) => {
+  return await setCache(key, value, ttl);
+};
+
+export const deleteCachedData = async (key) => {
+  return await deleteCache(key);
+};
 /**
  * Generate cache key for workspace
  */
@@ -364,6 +373,9 @@ export const invalidateUserCascade = async (userId) => {
 };
 
 export default {
+  getCachedData,
+  setCachedData,
+  deleteCachedData,
   cacheWorkspace,
   getWorkspaceCache,
   invalidateWorkspaceCache,

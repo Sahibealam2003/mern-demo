@@ -3,6 +3,7 @@ import { notificationQueue, closeNotificationQueue } from './notificationQueue.j
 import { startEmailWorker, closeEmailWorker } from './workers/emailWorker.js';
 import { startNotificationWorker, closeNotificationWorker } from './workers/notificationWorker.js';
 import logger from '../utils/logger.js';
+import { getRedisStatus } from '../config/redis.js';
 
 let workersStarted = false;
 
@@ -11,6 +12,13 @@ let workersStarted = false;
  */
 export const initializeQueues = () => {
   try {
+    const { connected } = getRedisStatus();
+
+    if (!connected) {
+      logger.warn('Redis not connected — skipping BullMQ workers startup');
+      return;
+    }
+
     startEmailWorker();
     startNotificationWorker();
     workersStarted = true;

@@ -110,11 +110,36 @@ export const transferOwnershipSchema = z.object({
 // ─── Todo schemas ─────────────────────────────────────────────────────────────
 
 export const createTodoSchema = z.object({
+  priority: z.preprocess((v) => {
+    if (typeof v === 'string') return v.toLowerCase();
+    return v;
+  }, z.enum(['low', 'medium', 'high', 'critical'])).optional().default('medium'),
+  status: z.preprocess((v) => {
+    if (typeof v !== 'string') return v;
+    // UI -> backend
+    if (v === 'TODO') return 'pending';
+    if (v === 'IN_PROGRESS') return 'in_progress';
+    if (v === 'REVIEW') return 'review';
+    if (v === 'COMPLETED') return 'completed';
+    return v;
+  }, z.enum(['pending', 'in_progress', 'review', 'completed', 'archived'])).optional().default('pending'),
   title: z.string().min(1, 'Title is required').max(200),
   description: z.string().max(2000).optional(),
-  priority: z.enum(['LOW', 'MEDIUM', 'HIGH']).optional().default('MEDIUM'),
-  status: z.enum(['TODO', 'IN_PROGRESS', 'REVIEW', 'COMPLETED']).optional().default('TODO'),
-  dueDate: z.string().datetime().optional().nullable(),
+
+  // UI sends YYYY-MM-DD; accept date-only or any valid datetime string
+  dueDate: z
+    .string()
+    .optional()
+    .nullable()
+    .refine(
+      (val) => {
+        if (val === null || val === undefined || val === '') return true;
+        if (/^\d{4}-\d{2}-\d{2}$/.test(val)) return true;
+        const d = new Date(val);
+        return !Number.isNaN(d.getTime());
+      },
+      { message: 'Invalid datetime' }
+    ),
   labels: z.array(z.string().max(30)).optional().default([]),
   color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional().nullable(),
   notes: z.string().max(5000).optional(),
@@ -124,9 +149,32 @@ export const createTodoSchema = z.object({
 export const updateTodoSchema = z.object({
   title: z.string().min(1).max(200).optional(),
   description: z.string().max(2000).optional(),
-  priority: z.enum(['LOW', 'MEDIUM', 'HIGH']).optional(),
-  status: z.enum(['TODO', 'IN_PROGRESS', 'REVIEW', 'COMPLETED']).optional(),
-  dueDate: z.string().datetime().optional().nullable(),
+  priority: z.preprocess((v) => {
+    if (typeof v === 'string') return v.toLowerCase();
+    return v;
+  }, z.enum(['low', 'medium', 'high', 'critical'])).optional(),
+  status: z.preprocess((v) => {
+    if (typeof v !== 'string') return v;
+    if (v === 'TODO') return 'pending';
+    if (v === 'IN_PROGRESS') return 'in_progress';
+    if (v === 'REVIEW') return 'review';
+    if (v === 'COMPLETED') return 'completed';
+    return v;
+  }, z.enum(['pending', 'in_progress', 'review', 'completed', 'archived'])).optional(),
+  // UI sends YYYY-MM-DD; accept date-only or any valid datetime string
+  dueDate: z
+    .string()
+    .optional()
+    .nullable()
+    .refine(
+      (val) => {
+        if (val === null || val === undefined || val === '') return true;
+        if (/^\d{4}-\d{2}-\d{2}$/.test(val)) return true;
+        const d = new Date(val);
+        return !Number.isNaN(d.getTime());
+      },
+      { message: 'Invalid datetime' }
+    ),
   labels: z.array(z.string().max(30)).optional(),
   color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional().nullable(),
   notes: z.string().max(5000).optional(),

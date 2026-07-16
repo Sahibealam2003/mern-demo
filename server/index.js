@@ -9,7 +9,7 @@ import rateLimit from 'express-rate-limit';
 import fileUpload from 'express-fileupload';
 
 import connect from './src/connnect/db.js';
-import { connectRedis } from './src/config/redis.js';
+import { connectToRedis } from './src/config/redis.js';
 import { initializeSocket, getIO } from './src/socket/index.js';
 import { initializeQueues, closeQueues } from './src/queues/index.js';
 import apiRouter from './src/routes/index.js';
@@ -127,7 +127,7 @@ const startServer = async () => {
     await connect();
 
     // 2. Connect to Redis (optional — app works without it)
-    await connectRedis();
+    await connectToRedis();
 
     // 3. Initialize Socket.IO
     initializeSocket(httpServer);

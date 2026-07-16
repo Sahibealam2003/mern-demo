@@ -1,6 +1,19 @@
 import axios from 'axios';
-import { store } from '../store/index.js';
 import { logout, setAccessToken } from '../store/slices/authSlice.js';
+
+// Keep localStorage + Redux in sync (so /auth/me always has a token)
+const LS_ACCESS_TOKEN_KEY = 'accessToken';
+const LS_REFRESH_TOKEN_KEY = 'refreshToken';
+
+const REDUX_STORE_KEY = '__TODO_APP_REDUX_STORE__';
+
+const getStore = () => {
+  if (typeof globalThis !== 'undefined' && globalThis[REDUX_STORE_KEY]) {
+    return globalThis[REDUX_STORE_KEY];
+  }
+
+  return null;
+};
 
 const BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -33,10 +46,21 @@ const processQueue = (error, token = null) => {
   failedQueue = [];
 };
 
-// Attach access token from Redux store to every request
+// Attach access token from Redux store (fallback to localStorage) to every request
 api.interceptors.request.use(
   (config) => {
-    const token = store.getState().auth.accessToken;
+    const currentStore = getStore();
+    const tokenFromRedux = currentStore?.getState?.().auth.accessToken;
+    const tokenFromLS = (() => {
+      try {
+        return localStorage.getItem(LS_ACCESS_TOKEN_KEY);
+      } catch {
+        return null;
+      }
+    })();
+
+    const token = tokenFromRedux || tokenFromLS;
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -74,15 +98,21 @@ api.interceptors.response.use(
       try {
         const response = await publicApi.post('/auth/refresh');
         const { accessToken } = response.data.data;
+        const currentStore = getStore();
 
-        store.dispatch(setAccessToken(accessToken));
+        // Sync token to Redux + localStorage
+        currentStore?.dispatch?.(setAccessToken(accessToken));
+        try {
+          localStorage.setItem(LS_ACCESS_TOKEN_KEY, accessToken);
+        } catch {}
+
         processQueue(null, accessToken);
 
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return api(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError, null);
-        store.dispatch(logout());
+        getStore()?.dispatch?.(logout());
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

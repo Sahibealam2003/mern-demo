@@ -21,13 +21,24 @@ export const createWorkspace = async (userId, data) => {
   try {
     const workspace = await Workspace.create({
       ...data,
+      // slug is required in the schema; generate from name if not provided
+      slug:
+        data?.slug ||
+        (typeof data?.name === 'string'
+          ? data.name
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, '-')
+              .replace(/^-+|-+$/g, '')
+          : undefined),
       owner: userId,
+
       members: [{
         user: userId,
         role: WORKSPACE_ROLES.OWNER,
         joinedAt: new Date(),
       }],
     });
+
 
     // Invalidate user workspaces cache
     await deleteCachedData(`workspaces:user:${userId}`);

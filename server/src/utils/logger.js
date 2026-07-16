@@ -1,5 +1,9 @@
-const winston = require("winston");
-const path = require("path");
+import winston from "winston";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Custom log format
 const logFormat = winston.format.combine(
@@ -7,46 +11,43 @@ const logFormat = winston.format.combine(
   winston.format.errors({ stack: true }),
   winston.format.printf(({ timestamp, level, message, stack, ...metadata }) => {
     let log = `${timestamp} [${level.toUpperCase()}]: ${message}`;
-    
-    // Add metadata if present (excluding sensitive data)
+
     if (Object.keys(metadata).length > 0) {
-      // Filter out sensitive information
       const safeMetadata = { ...metadata };
+
       delete safeMetadata.password;
       delete safeMetadata.token;
       delete safeMetadata.refreshToken;
       delete safeMetadata.accessToken;
       delete safeMetadata.passwordHash;
-      
+
       if (Object.keys(safeMetadata).length > 0) {
         log += ` | ${JSON.stringify(safeMetadata)}`;
       }
     }
-    
-    // Add stack trace for errors
+
     if (stack) {
       log += `\n${stack}`;
     }
-    
+
     return log;
   })
 );
 
-// Create logger instance
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || "info",
   format: logFormat,
-  defaultMeta: { service: "mern-stack-api" },
+  defaultMeta: {
+    service: "mern-stack-api",
+  },
   transports: [
-    // Console transport for all environments
     new winston.transports.Console({
       format: winston.format.combine(
         winston.format.colorize(),
         logFormat
       ),
     }),
-    
-    // File transport for errors (non-production)
+
     ...(process.env.NODE_ENV !== "production"
       ? [
           new winston.transports.File({
@@ -61,11 +62,10 @@ const logger = winston.createLogger({
   ],
 });
 
-// Create stream for Morgan HTTP logging
 logger.stream = {
-  write: (message) => {
+  write(message) {
     logger.http(message.trim());
   },
 };
 
-module.exports = logger;
+export default logger;

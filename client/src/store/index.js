@@ -4,21 +4,37 @@ import workspaceReducer from './slices/workspaceSlice.js';
 import notificationReducer from './slices/notificationSlice.js';
 import uiReducer from './slices/uiSlice.js';
 
-export const store = configureStore({
-  reducer: {
-    auth: authReducer,
-    workspace: workspaceReducer,
-    notification: notificationReducer,
-    ui: uiReducer,
-  },
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({
-      serializableCheck: {
-        // Ignore socket instances stored outside Redux
-        ignoredActions: ['auth/login/fulfilled'],
+const REDUX_STORE_KEY = '__TODO_APP_REDUX_STORE__';
+
+let storeInstance;
+
+export const getStore = () => {
+  if (!storeInstance) {
+    storeInstance = configureStore({
+      reducer: {
+        auth: authReducer,
+        workspace: workspaceReducer,
+        notification: notificationReducer,
+        ui: uiReducer,
       },
-    }),
-  devTools: import.meta.env.DEV,
-});
+      middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware({
+          serializableCheck: {
+            // Ignore socket instances stored outside Redux
+            ignoredActions: ['auth/login/fulfilled'],
+          },
+        }),
+      devTools: import.meta.env.DEV,
+    });
+
+    if (typeof globalThis !== 'undefined') {
+      globalThis[REDUX_STORE_KEY] = storeInstance;
+    }
+  }
+
+  return storeInstance;
+};
+
+export const store = getStore();
 
 export default store;

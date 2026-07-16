@@ -1,5 +1,5 @@
 import { Worker } from 'bullmq';
-import { getRedisConnection } from '../../config/redis.js';
+import { getRedisClient } from '../../config/redis.js';
 import {
   createNotification,
   createBulkNotifications,
@@ -82,7 +82,7 @@ const processNotificationJob = async (job) => {
  */
 export const startNotificationWorker = () => {
   try {
-    const connection = getRedisConnection();
+    const connection = getRedisClient();
     if (!connection) {
       logger.warn('Redis not available — notification worker not started');
       return null;

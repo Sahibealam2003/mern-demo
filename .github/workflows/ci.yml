@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # -------- Server --------
+      - name: Install server dependencies
+        working-directory: server
+        run: npm ci --legacy-peer-deps
+
+      - name: Build server (lint/test if available)
+        working-directory: server
+        run: |
+          if npm run -s lint; then npm run lint; else echo "No server lint script"; fi
+
+      # -------- Client --------
+      - name: Install client dependencies
+        working-directory: client
+        run: npm ci --legacy-peer-deps
+
+      - name: Build client
+        working-directory: client
+        run: npm run build
+

@@ -1,0 +1,47 @@
+services:
+  server:
+    build:
+      context: ./server
+    container_name: mern-server
+    ports:
+      - "5000:5000"
+    environment:
+      # Set these in an .env file or override when running compose
+      NODE_ENV: production
+      PORT: 5000
+      MONGODB_URI: ""
+      REDIS_URL: "redis://redis:6379"
+      CLIENT_URL: "http://localhost:8080"
+    depends_on:
+      - mongo
+      - redis
+
+  client:
+    build:
+      context: ./client
+    container_name: mern-client
+    ports:
+      - "8080:80"
+    depends_on:
+      - server
+
+  mongo:
+    image: mongo:7
+    container_name: mern-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  redis:
+    image: redis:7-alpine
+    container_name: mern-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  mongo_data:
+  redis_data:
+

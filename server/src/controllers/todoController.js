@@ -38,10 +38,11 @@ export const create = async (req, res) => {
     await Activity.create({
       user: userId,
       workspace: workspaceId,
-      action: 'TODO_CREATED',
+      action: 'created',
+      entityType: 'Todo',
+      entityId: todo._id,
+      entityName: todo.title,
       description: `Created todo "${todo.title}"`,
-      relatedModel: 'Todo',
-      relatedId: todo._id,
     });
 
     // Emit socket event
@@ -132,10 +133,11 @@ export const update = async (req, res) => {
     await Activity.create({
       user: userId,
       workspace: workspaceId,
-      action: 'TODO_UPDATED',
+      action: 'updated',
+      entityType: 'Todo',
+      entityId: todo._id,
+      entityName: todo.title,
       description: `Updated todo "${todo.title}"`,
-      relatedModel: 'Todo',
-      relatedId: todo._id,
     });
 
     if (req.io) {

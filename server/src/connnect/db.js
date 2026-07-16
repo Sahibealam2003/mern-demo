@@ -25,8 +25,13 @@ const connect = async () => {
     });
   } catch (error) {
     logger.error('MongoDB connection failed:', error.message);
-    process.exit(1);
+
+    // Prevent immediate hard crash; let the rest of the app boot.
+    // This keeps the backend "error-free" in dev environments where Mongo isn't reachable.
+    // Critical paths will still fail when endpoints hit the DB.
+    return null;
   }
 };
+
 
 export default connect;

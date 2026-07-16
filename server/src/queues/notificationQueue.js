@@ -1,5 +1,5 @@
 import { Queue } from 'bullmq';
-import { getRedisConnection } from '../config/redis.js';
+import { getRedisClient } from '../config/redis.js';
 import logger from '../utils/logger.js';
 
 let notificationQueue = null;
@@ -21,7 +21,7 @@ export const getNotificationQueue = () => {
   if (notificationQueue) return notificationQueue;
 
   try {
-    const connection = getRedisConnection();
+    const connection = getRedisClient();
     if (!connection) return null;
 
     notificationQueue = new Queue(QUEUE_NAME, {

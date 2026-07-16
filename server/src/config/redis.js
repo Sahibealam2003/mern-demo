@@ -5,19 +5,32 @@ let redisClient = null;
 
 /**
  * Connect to Redis
+ * Redis is treated as optional:
+ * - If REDIS_ENABLED=true OR REDIS_URL is explicitly provided, we try connecting
+ * - Otherwise we skip Redis entirely (prevents noisy ECONNREFUSED spam)
  */
 export const connectToRedis = async () => {
   try {
-    const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
+    const redisEnabled = String(process.env.REDIS_ENABLED || '').toLowerCase() === 'true';
+    const redisUrlFromEnv = process.env.REDIS_URL;
+
+    if (!redisEnabled && !redisUrlFromEnv) {
+      logger.warn('Redis disabled — skipping Redis connection');
+      return null;
+    }
+
+    const REDIS_URL = redisUrlFromEnv || 'redis://localhost:6379';
 
     redisClient = new Redis(REDIS_URL, {
-      maxRetriesPerRequest: 3,
+      // BullMQ requires maxRetriesPerRequest to be null when using ioredis options.
+      maxRetriesPerRequest: null,
       retryStrategy: (times) => {
         const delay = Math.min(times * 50, 2000);
         return delay;
       },
       reconnectOnError: (err) => {
-        logger.error('Redis reconnect on error:', err);
+        // Keep reconnect logs minimal; avoid flooding on ECONNREFUSED
+        logger.warn('Redis reconnect on error');
         return true;
       },
     });
@@ -40,8 +53,10 @@ export const connectToRedis = async () => {
 
     // Graceful shutdown
     process.on('SIGINT', async () => {
-      await redisClient.quit();
-      logger.info('Redis connection closed due to app termination');
+      if (redisClient) {
+        await redisClient.quit();
+        logger.info('Redis connection closed due to app termination');
+      }
     });
 
     return redisClient;

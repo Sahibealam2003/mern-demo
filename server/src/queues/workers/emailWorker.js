@@ -1,5 +1,5 @@
 import { Worker } from 'bullmq';
-import { getRedisConnection } from '../../config/redis.js';
+import { getRedisClient } from '../../config/redis.js';
 import {
   sendVerificationEmail,
   sendPasswordResetEmail,
@@ -65,7 +65,7 @@ const processEmailJob = async (job) => {
  */
 export const startEmailWorker = () => {
   try {
-    const connection = getRedisConnection();
+    const connection = getRedisClient();
     if (!connection) {
       logger.warn('Redis not available — email worker not started');
       return null;
