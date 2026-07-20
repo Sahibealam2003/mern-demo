@@ -16,6 +16,15 @@ RUN npm ci --legacy-peer-deps
 # Copy source
 COPY . .
 
+# Vite inlines these at build time. .dockerignore excludes .env, so without
+# these ARGs the bundle falls back to http://localhost:5000.
+ARG VITE_API_URL
+ARG VITE_SOCKET_URL
+ARG VITE_APP_NAME=TodoApp
+ENV VITE_API_URL=$VITE_API_URL \
+    VITE_SOCKET_URL=$VITE_SOCKET_URL \
+    VITE_APP_NAME=$VITE_APP_NAME
+
 # Build the frontend
 RUN npm run build
 
