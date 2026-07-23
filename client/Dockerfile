@@ -1,66 +1,23 @@
-# syntax=docker/dockerfile:1
-
-############################
-# Build stage (Vite -> dist)
-############################
+# ─── Stage 1: Build the Vite bundle ─────────────────────────────────────────────
 FROM node:20-alpine AS build
 
 WORKDIR /app
 
-# Install dependencies first (better layer caching)
-COPY package.json package-lock.json ./
-# Use legacy peer deps to avoid install failures due to optional peer deps
-RUN npm ci --legacy-peer-deps
+COPY package*.json ./
+RUN npm ci
 
-
-# Copy source
 COPY . .
-
-# Vite inlines these at build time. .dockerignore excludes .env, so without
-# these ARGs the bundle falls back to http://localhost:5000.
-ARG VITE_API_URL
-ARG VITE_SOCKET_URL
-ARG VITE_APP_NAME=TodoApp
-ENV VITE_API_URL=$VITE_API_URL \
-    VITE_SOCKET_URL=$VITE_SOCKET_URL \
-    VITE_APP_NAME=$VITE_APP_NAME
-
-# Build the frontend
 RUN npm run build
 
-############################
-# Production stage (serve static files)
-############################
-FROM nginx:1.27-alpine AS production
+# ─── Stage 2: Serve static files with nginx ─────────────────────────────────────
+FROM nginx:1.27-alpine
 
-# Remove default nginx site
-RUN rm -f /etc/nginx/conf.d/default.conf
+# Replace default config with our SPA + API proxy config
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Copy built assets
+# Copy the built assets from the build stage
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# SPA fallback + caching for static assets
-RUN cat > /etc/nginx/conf.d/default.conf <<'EOF'
-server {
-  listen 80;
-  server_name _;
-
-  root /usr/share/nginx/html;
-  index index.html;
-
-  location / {
-    try_files $uri $uri/ /index.html;
-  }
-
-  # Cache static assets aggressively
-  location ~* \/(?:assets|static)/.*\.(?:js|css|png|jpg|jpeg|gif|svg|ico|woff2?)$ {
-    expires 30d;
-    add_header Cache-Control 'public, immutable';
-  }
-}
-EOF
-
-
 EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
 
+CMD ["nginx", "-g", "daemon off;"]

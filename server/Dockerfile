@@ -1,17 +1,21 @@
+# ─── Backend: Express API ──────────────────────────────────────────────────────
 FROM node:20-alpine
 
+# Create app directory
 WORKDIR /app
 
 # Install dependencies first (better layer caching)
-COPY package.json package-lock.json ./
-RUN npm ci
+COPY package*.json ./
+RUN npm ci --omit=dev
 
-# Copy app source
+# Copy application source
 COPY . .
 
-# Expose app port (default used by code)
+# Runtime environment
+ENV NODE_ENV=production
 EXPOSE 5000
 
-# Production start
-CMD ["npm", "start"]
+# Run as the non-root user that comes with the node image
+USER node
 
+CMD ["node", "index.js"]
