@@ -83,7 +83,7 @@ const AdminDashboard = () => {
     try {
       await axiosInstance.post(`/admin/users/${userId}/revoke-sessions`);
       toast.success("All sessions revoked successfully");
-    } catch (error) {
+    } catch {
       toast.error("Failed to revoke sessions");
     }
   };

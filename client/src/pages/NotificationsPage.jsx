@@ -2,7 +2,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   selectNotifications, selectNotificationLoading,
   fetchNotifications, markNotificationRead, markAllNotificationsRead,
-  deleteNotification, deleteNotification as removeNotif,
+  deleteNotification,
 } from '../store/slices/notificationSlice.js';
 import { useEffect } from 'react';
 import { format } from 'date-fns';

@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
           setUser(response.data.data.user);
           setIsAuthenticated(true);
         }
-      } catch (error) {
+      } catch {
         // Token invalid or expired - clear storage
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
@@ -136,6 +136,7 @@ export const AuthProvider = ({ children }) => {
 /**
  * Hook to use auth context
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {

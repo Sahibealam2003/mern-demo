@@ -4,7 +4,6 @@ import { useSelector } from 'react-redux';
 import { selectUser } from '../store/slices/authSlice.js';
 import dashboardService from '../services/dashboardService.js';
 import { format, isToday, isTomorrow } from 'date-fns';
-import clsx from 'clsx';
 
 const PRIORITY_COLOR = { HIGH: 'text-red-500', MEDIUM: 'text-yellow-500', LOW: 'text-green-500' };
 
@@ -36,11 +35,6 @@ export default function DashboardPage() {
     queryKey: ['dashboard'],
     queryFn: dashboardService.getSummary,
     refetchInterval: 60_000,
-  });
-
-  const { data: productivityData } = useQuery({
-    queryKey: ['dashboard-productivity'],
-    queryFn: () => dashboardService.getProductivity({ days: 7 }),
   });
 
   const stats = data?.data?.stats;

@@ -38,7 +38,7 @@ export const registerSchema = z.object({
       "Password must contain at least one number"
     )
     .refine(
-      (password) => /[!@#$%^&*(),.?\":{}|<>]/.test(password),
+      (password) => /[!@#$%^&*(),.?":{}|<>]/.test(password),
       "Password must contain at least one special character"
     ),
   confirmPassword: z

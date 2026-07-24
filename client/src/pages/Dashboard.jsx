@@ -1,13 +1,10 @@
-import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import axiosInstance from "../api/axiosInstance";
 
 /**
  * Dashboard - User dashboard page
  */
 const Dashboard = () => {
   const { user } = useAuth();
-  const [stats, setStats] = useState(null);
 
   return (
     <div className="space-y-6">

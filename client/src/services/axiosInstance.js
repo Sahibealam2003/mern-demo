@@ -104,7 +104,7 @@ api.interceptors.response.use(
         currentStore?.dispatch?.(setAccessToken(accessToken));
         try {
           localStorage.setItem(LS_ACCESS_TOKEN_KEY, accessToken);
-        } catch {}
+        } catch { /* ignore storage errors */ }
 
         processQueue(null, accessToken);
 

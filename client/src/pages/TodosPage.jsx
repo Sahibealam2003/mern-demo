@@ -3,7 +3,6 @@ import { useParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import todoService from '../services/todoService.js';
 import { useSelector } from 'react-redux';
-import { selectUser } from '../store/slices/authSlice.js';
 import { selectCurrentWorkspace } from '../store/slices/workspaceSlice.js';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -25,11 +24,10 @@ const STATUS_BADGE = { TODO: 'badge-gray', IN_PROGRESS: 'badge-blue', REVIEW: 'b
 export default function TodosPage() {
   const { workspaceId } = useParams();
   const qc = useQueryClient();
-  const currentUser = useSelector(selectUser);
   const workspace = useSelector(selectCurrentWorkspace);
   const [filters, setFilters] = useState({ status: '', priority: '', search: '' });
   const [showForm, setShowForm] = useState(false);
-  const [selectedTodo, setSelectedTodo] = useState(null);
+  const [, setSelectedTodo] = useState(null);
 
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm({
     resolver: zodResolver(createSchema),

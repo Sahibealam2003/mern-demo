@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchWorkspace, selectCurrentWorkspace, updateWorkspace, deleteWorkspace } from '../store/slices/workspaceSlice.js';
+import { fetchWorkspace, selectCurrentWorkspace } from '../store/slices/workspaceSlice.js';
 import { selectUser } from '../store/slices/authSlice.js';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import workspaceService from '../services/workspaceService.js';
@@ -26,7 +26,6 @@ const ROLE_COLORS = {
 
 export default function WorkspaceDetailPage() {
   const { id } = useParams();
-  const navigate = useNavigate();
   const dispatch = useDispatch();
   const qc = useQueryClient();
   const workspace = useSelector(selectCurrentWorkspace);

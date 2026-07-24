@@ -26,7 +26,7 @@ const Register = () => {
 
   const onSubmit = async (data) => {
     // Remove confirmPassword before sending to API
-    const { confirmPassword, ...registerData } = data;
+    const { confirmPassword: _confirmPassword, ...registerData } = data;
     
     setIsSubmitting(true);
     try {

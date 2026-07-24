@@ -156,6 +156,7 @@ export function SocketProvider({ children }) {
   return <SocketContext.Provider value={value}>{children}</SocketContext.Provider>;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useSocket = () => {
   const ctx = useContext(SocketContext);
   if (!ctx) throw new Error('useSocket must be used within SocketProvider');
